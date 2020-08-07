@@ -16,3 +16,15 @@ allprojects {
         jcenter()
     }
 }
+
+plugins {
+    id("org.sonarqube") version "3.0"
+}
+
+sonarqube {
+    properties {
+        property("sonar.projectKey", "TurpIF_android-coverage-test")
+        property("sonar.organization", "turpif-github")
+        property("sonar.host.url", "https://sonarcloud.io")
+    }
+}
