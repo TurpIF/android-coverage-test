@@ -2,6 +2,8 @@ name: CI
 
 on:
   push:
+    branches:
+      - main
   pull_request:
 
 jobs:
@@ -16,6 +18,11 @@ jobs:
 
       - name: Run Java tests
         run: ./gradlew check assembleAndroidTest
+
+      - name: SonarQube Analysis
+        run: ./gradlew sonarqube
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   android-tests:
     runs-on: macos-latest
