@@ -4,7 +4,6 @@ class MyLibrary {
 
     // This is covered by JVM tests in the same module
     fun zero(): Int {
-        System.out.println("test")
         return 0
     }
 
