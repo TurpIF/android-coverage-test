@@ -27,6 +27,17 @@ sonarqube {
         property("sonar.projectKey", "TurpIF_android-coverage-test")
         property("sonar.organization", "turpif-github")
         property("sonar.host.url", "https://sonarcloud.io")
+
+        // There is no dependency in the Gradle graph here. One should first generate coverage
+        // reports before invoking the sonarqube task. In this way, the CI can run JVM and
+        // Android tests in parallel, and when both are finished, CI would invoke this task.
+        val jacocoReports = subprojects.flatMap {
+            val reportTree = it.fileTree(it.buildDir)
+            reportTree.include("reports/jacoco/**/*.xml") // Reports from JVM tests
+            reportTree.include("reports/coverage/**/*.xml") // Reports from Android tests
+            reportTree.files
+        }
+        property("sonar.coverage.jacoco.xmlReportPaths", jacocoReports)
     }
 }
 
