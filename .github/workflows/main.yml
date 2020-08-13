@@ -17,13 +17,13 @@ jobs:
         uses: malinskiy/action-android/install-sdk@release/0.0.7
 
       - name: Run Java tests
-        run: ./gradlew check assembleAndroidTest
+        run: ./gradlew check assembleAndroidTest codeCoverageReport
 
-      - name: SonarQube Analysis
-        run: ./gradlew sonarqube
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload coverage report for quality-tests
+        uses: actions/upload-artifact@v2
+        with:
+          name: java-tests-coverage
+          path: "**/reports/jacoco/**"
 
   android-tests:
     runs-on: macos-latest
@@ -39,4 +39,36 @@ jobs:
         with:
           api: 29
           tag: google_apis
-          cmd: ./gradlew connectedCheck
+          cmd: ./gradlew connectedCheck -PcodeCoverage=true
+
+      - name: Upload coverage report for quality-tests
+        uses: actions/upload-artifact@v2
+        with:
+          name: android-tests-coverage
+          path: "**/reports/coverage/**"
+
+  quality-tests:
+    runs-on: ubuntu-latest
+    needs:
+      - java-tests
+      - android-tests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Download coverage reports of java-tests
+        uses: actions/download-artifact@v2
+        with:
+          name: java-tests-coverage
+
+      - name: Download coverage reports of android-tests
+        uses: actions/download-artifact@v2
+        with:
+          name: android-tests-coverage
+
+      - name: SonarQube Analysis
+        run: ./gradlew sonarqube
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
